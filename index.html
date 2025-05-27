@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مواقيت الصلاة المتكاملة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- إشعارات PWA -->
+<meta name="theme-color" content="#d4af37">
+<link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        :root {
+            --primary-color: #ffb700f2;
+            --secondary-color: #1a1a1a;
+            --text-color: #f5f5f5;
+            --prayer-time-bg: rgba(0, 0, 0, 0.7);
+            --card-bg: rgba(26, 26, 26, 0.8);
+            --highlight-color: #ffd700;
+            --ramadan-color:  #ffc400;
+            --eid-al-fitr-color: #0044ff;
+            --eid-al-adha-color: #ff1100;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background: url('https://images.unsplash.com/photo-1519817650390-64a93db51149?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 20px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--primary-color);
+            animation: fadeInDown 1s ease;
+        }
+        
+        .time-date-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            order: 3;
+        }
+        
+        .clock-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            order: 2;
+        }
+        
+        .current-time {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .hijri-date, .gregorian-date, .day-name {
+            font-size: 1rem;
+            text-align: right;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+        
+        .mosque-icon {
+            display: flex;
+            align-items: center;
+            order: 1;
+        }
+        
+        .location-selector {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideInDown 1s ease;
+            border: 1px solid var(--primary-color);
+        }
+        
+        .location-title {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        
+        .select-group {
+            margin-bottom: 15px;
+        }
+        
+        .select-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+        
+        .select-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--primary-color);
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .select-group select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+        
+        .prayer-times-container {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1.5s ease;
+            border: 1px solid var(--primary-color);
+        }
+        
+        .prayer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--primary-color);
+        }
+        
+        .location-display {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .next-prayer {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        .prayer-times-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .prayer-time-card {
+            background-color: var(--prayer-time-bg);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-color);
+        }
+        
+        .prayer-time-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+        
+        .prayer-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .prayer-time {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .next-prayer-card {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+        
+        .next-prayer-card .prayer-name {
+            color: var(--secondary-color);
+        }
+        
+        .ramadan-countdown,
+        .eid-countdown {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 2s ease;
+            text-align: center;
+            border: 1px solid var(--primary-color);
+        }
+        
+        .ramadan-countdown {
+            border-color: var(--ramadan-color);
+        }
+        
+        .eid-al-fitr-countdown {
+            border-color: var(--eid-al-fitr-color);
+        }
+        
+        .eid-al-adha-countdown {
+            border-color: var(--eid-al-adha-color);
+        }
+        
+        .ramadan-title,
+        .eid-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        
+        .ramadan-title {
+            color: var(--ramadan-color);
+            border-bottom-color: var(--ramadan-color);
+        }
+        
+        .eid-al-fitr-title {
+            color: var(--eid-al-fitr-color);
+            border-bottom-color: var(--eid-al-fitr-color);
+        }
+        
+        .eid-al-adha-title {
+            color: var(--eid-al-adha-color);
+            border-bottom-color: var(--eid-al-adha-color);
+        }
+        
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .countdown-box {
+            background-color: var(--prayer-time-bg);
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 80px;
+            text-align: center;
+            border: 1px solid var(--primary-color);
+        }
+        
+        .ramadan-countdown .countdown-box {
+            border-color: var(--ramadan-color);
+        }
+        
+        .eid-al-fitr-countdown .countdown-box {
+            border-color: var(--eid-al-fitr-color);
+        }
+        
+        .eid-al-adha-countdown .countdown-box {
+            border-color: var(--eid-al-adha-color);
+        }
+        
+        .countdown-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .ramadan-countdown .countdown-value {
+            color: var(--ramadan-color);
+        }
+        
+        .eid-al-fitr-countdown .countdown-value {
+            color: var(--eid-al-fitr-color);
+        }
+        
+        .eid-al-adha-countdown .countdown-value {
+            color: var(--eid-al-adha-color);
+        }
+        
+        .countdown-label {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        .eid-details {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                max-width: 750px;
+                padding: 30px;
+            }
+            
+            .prayer-times-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .current-time {
+                font-size: 2.3rem;
+            }
+            
+            .hijri-date, .gregorian-date, .day-name {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .container {
+                max-width: 970px;
+            }
+            
+            .prayer-times-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1170px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="mosque-icon">
+                <i class="fas fa-mosque" style="font-size: 3rem; color: var(--primary-color);"></i>
+            </div>
+            <div class="clock-container">
+                <div class="current-time" id="current-time">--:--:-- --</div>
+            </div>
+            <div class="time-date-container">
+                <div class="day-name" id="day-name"></div>
+                <div class="hijri-date" id="hijri-date"></div>
+                <div class="gregorian-date" id="gregorian-date"></div>
+            </div>
+        </div>
+        
+        <div class="location-selector">
+            <h2 class="location-title">اختر الموقع</h2>
+            <div class="select-group">
+                <label for="country">الدولة</label>
+                <select id="country" onchange="updateCities()">
+                    <option value="SA">المملكة العربية السعودية</option>
+                    <option value="EG">مصر</option>
+                    <option value="AE">الإمارات العربية المتحدة</option>
+                    <option value="QA">قطر</option>
+                    <option value="KW">الكويت</option>
+                    <option value="BH">البحرين</option>
+                    <option value="OM">عمان</option>
+                    <option value="IQ">العراق</option>
+                    <option value="JO">الأردن</option>
+                    <option value="LB">لبنان</option>
+                    <option value="SY">سوريا</option>
+                    <option value="YE">اليمن</option>
+                    <option value="PS">فلسطين</option>
+                    <option value="DZ">الجزائر</option>
+                    <option value="MA">المغرب</option>
+                    <option value="TN">تونس</option>
+                    <option value="LY">ليبيا</option>
+                    <option value="SD">السودان</option>
+                    <option value="SO">الصومال</option>
+                    <option value="DJ">جيبوتي</option>
+                    <option value="MR">موريتانيا</option>
+                    <option value="TR">تركيا</option>
+                    <option value="ID">إندونيسيا</option>
+                    <option value="MY">ماليزيا</option>
+                    <option value="PK">باكستان</option>
+                    <option value="AF">أفغانستان</option>
+                    <option value="IR">إيران</option>
+                    <option value="BN">بروناي</option>
+                    <option value="BD">بنغلاديش</option>
+                    <option value="MV">المالديف</option>
+                    <option value="AZ">أذربيجان</option>
+                    <option value="KZ">كازاخستان</option>
+                    <option value="KG">قيرغيزستان</option>
+                    <option value="TJ">طاجيكستان</option>
+                    <option value="TM">تركمانستان</option>
+                    <option value="UZ">أوزبكستان</option>
+                    <option value="AL">ألبانيا</option>
+                    <option value="BA">البوسنة والهرسك</option>
+                    <option value="XK">كوسوفو</option>
+                    <option value="GM">غامبيا</option>
+                    <option value="GN">غينيا</option>
+                    <option value="ML">مالي</option>
+                    <option value="NE">النيجر</option>
+                    <option value="NG">نيجيريا</option>
+                    <option value="SN">السنغال</option>
+                    <option value="SL">سيراليون</option>
+                    <option value="BF">بوركينا فاسو</option>
+                    <option value="TD">تشاد</option>
+                    <option value="CI">ساحل العاج</option>
+                    <option value="CM">الكاميرون</option>
+                    <option value="TG">توغو</option>
+                    <option value="BJ">بنين</option>
+                    <option value="GH">غانا</option>
+                </select>
+            </div>
+            <div class="select-group">
+                <label for="city">المدينة</label>
+                <select id="city" onchange="updatePrayerTimes()">
+                    <option value="الرياض">الرياض</option>
+                    <option value="مكة المكرمة">مكة المكرمة</option>
+                    <option value="المدينة المنورة">المدينة المنورة</option>
+                    <option value="جدة">جدة</option>
+                    <option value="الدمام">الدمام</option>
+                    <option value="الطائف">الطائف</option>
+                    <option value="تبوك">تبوك</option>
+                    <option value="أبها">أبها</option>
+                </select>
+            </div>
+            <div class="select-group">
+                <label for="calculation-method">طريقة الحساب</label>
+                <select id="calculation-method" onchange="updatePrayerTimes()">
+                    <option value="UmmAlQura">أم القرى (مكة المكرمة)</option>
+                    <option value="Egyptian">الهيئة المصرية العامة للمساحة</option>
+                    <option value="Karachi">جامعة العلوم الإسلامية، كراتشي</option>
+                    <option value="MuslimWorldLeague">رابطة العالم الإسلامي</option>
+                    <option value="NorthAmerica">أمريكا الشمالية</option>
+                    <option value="Dubai">دبي</option>
+                    <option value="Kuwait">الكويت</option>
+                    <option value="Qatar">قطر</option>
+                    <option value="Singapore">سنغافورة</option>
+                    <option value="Tehran">طهران</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="prayer-times-container">
+            <div class="prayer-header">
+                <div>
+                    <div class="location-display" id="current-location">المدينة المنورة، المملكة العربية السعودية</div>
+                </div>
+                <div class="days-remaining" id="days-remaining"></div>
+            </div>
+            
+            <div class="next-prayer" id="next-prayer">
+                جاري حساب وقت الصلاة التالية...
+            </div>
+            
+            <div class="prayer-times-grid">
+                <div class="prayer-time-card" id="fajr-card">
+                    <div class="prayer-name">الفجْر</div>
+                    <div class="prayer-time" id="fajr-time">--:-- --</div>
+                </div>
+                <div class="prayer-time-card" id="sunrise-card">
+                    <div class="prayer-name">الشروق</div>
+                    <div class="prayer-time" id="sunrise-time">--:-- --</div>
+                </div>
+                <div class="prayer-time-card" id="dhuhr-card">
+                    <div class="prayer-name">الظُّهْر</div>
+                    <div class="prayer-time" id="dhuhr-time">--:-- --</div>
+                </div>
+                <div class="prayer-time-card" id="asr-card">
+                    <div class="prayer-name">العَصر</div>
+                    <div class="prayer-time" id="asr-time">--:-- --</div>
+                </div>
+                <div class="prayer-time-card" id="maghrib-card">
+                    <div class="prayer-name">المَغرب</div>
+                    <div class="prayer-time" id="maghrib-time">--:-- --</div>
+                </div>
+                <div class="prayer-time-card" id="isha-card">
+                    <div class="prayer-name">العِشاء</div>
+                    <div class="prayer-time" id="isha-time">--:-- --</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ramadan-countdown">
+            <h2 class="ramadan-title">العد التنازلي لرمضان 1447 / 2026</h2>
+            <div class="countdown-container">
+                <div class="countdown-box">
+                    <div class="countdown-value" id="ramadan-days">--</div>
+                    <div class="countdown-label">يوم</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="ramadan-hours">--</div>
+                    <div class="countdown-label">ساعة</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="ramadan-minutes">--</div>
+                    <div class="countdown-label">دقيقة</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="ramadan-seconds">--</div>
+                    <div class="countdown-label">ثانية</div>
+                </div>
+            </div>
+            <div class="eid-details">✨
+                سيبدأ رمضان 1447 هـ / 2026 مـ يوم الأربعاء 18 فبراير 2026 أو الخميس 19 فبراير 2026 حسب رؤية الهلال
+.           كما أنه من المتوقع أن تكون عِدة رمضان 30 يوم هذه السنة
+ليلة تحري هلال رمضان يوم الثلثاء 17 فبراير 2026 .✨</div>
+        </div>
+        
+        <div class="eid-countdown eid-al-fitr-countdown">
+            <h2 class="eid-title eid-al-fitr-title">العد التنازلي لعيد الفطر 1447 / 2026</h2>
+            <div class="countdown-container">
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-fitr-days">--</div>
+                    <div class="countdown-label">يوم</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-fitr-hours">--</div>
+                    <div class="countdown-label">ساعة</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-fitr-minutes">--</div>
+                    <div class="countdown-label">دقيقة</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-fitr-seconds">--</div>
+                    <div class="countdown-label">ثانية</div>
+                </div>
+            </div>
+            <div class="eid-details">
+                ✨ أول أيام عيد الفطر لهذا العام 1447 هـ / 2026 مـ سيكون يوم الجمعة 20 مارس 2026 في حال كانت عِدة رمضان 30 يوم (وهو المرجح إن شاء الله) أو يوم الخميس 19 مارس في حال كانت عِدة رمضان 29 يوم .<br>
+                 ليلة تحري هلال شوال يوم الأربعاء 18 مارس 2026 الموافق لـ 29 رمضان 1447
+            .✨</div>
+        </div>
+        
+        <div class="eid-countdown eid-al-adha-countdown">
+            <h2 class="eid-title eid-al-adha-title">العد التنازلي لعيد الأضحى 1446 / 2025</h2>
+            <div class="countdown-container">
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-adha-days">--</div>
+                    <div class="countdown-label">يوم</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-adha-hours">--</div>
+                    <div class="countdown-label">ساعة</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-adha-minutes">--</div>
+                    <div class="countdown-label">دقيقة</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="countdown-value" id="eid-adha-seconds">--</div>
+                    <div class="countdown-label">ثانية</div>
+                </div>
+            </div>
+            <div class="eid-details">✨
+                أول أيام عيد الأضحى لهذا العام 1446 هـ / 2025 مـ سيكون يوم الاثنين 06 يونيو 2025.
+                ليلة تحري هلال ذو الحجة يوم الثلاثاء 27 مايو 2025 الموافق لـ 29 ذو القعدة 1446
+           .✨ </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.aladhan.com/v1/timingsByCity';
+        const PRAYER_ORDER = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        let prayerTimesCache = {};
+        let lastUpdateDate = null;
+        
+        let currentPrayerTimes = {
+            Fajr: '4:13 AM',
+            Sunrise: '5:43 AM',
+            Dhuhr: '12:18 PM',
+            Asr: '3:45 PM',
+            Maghrib: '6:53 PM',
+            Isha: '8:13 PM'
+        };
+        
+        let currentLocation = {
+            country: localStorage.getItem('selectedCountry') || 'SA',
+            city: localStorage.getItem('selectedCity') || 'المدينة المنورة',
+            method: localStorage.getItem('calculationMethod') || 'UmmAlQura'
+        };
+        
+        const citiesByCountry = {
+            "EG": [
+        "القاهرة", "مشتهر", "طوخ", "بنها", // المدن الجديدة
+        "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة", 
+        "الفيوم", "الغربية", "الإسماعيلية", "المنوفية", "المنيا", "القليوبية", 
+        "الأقصر", "أسوان", "أسيوط", "بني سويف", "بورسعيد", "دمياط", 
+        "الشرقية", "جنوب سيناء", "كفر الشيخ", "مطروح", "قنا", 
+        "شمال سيناء", "سوهاج", "السويس", "الوادي الجديد"
+    ],
+            "SA": [
+                "الرياض", "مكة المكرمة", "المدينة المنورة", "جدة", "الدمام", "الطائف", 
+                "تبوك", "أبها", "الخبر", "الجبيل", "حائل", "نجران", "ينبع", 
+                "القطيف", "الظهران", "بريدة", "عنيزة", "الخرج", "جازان"
+            ],
+            "AE": [
+                "دبي", "أبوظبي", "الشارقة", "العين", "عجمان", "رأس الخيمة", 
+                "الفجيرة", "أم القيوين"
+            ],
+            "QA": [
+                "الدوحة", "الريان", "أم صلال", "الوكرة", "الخور", "الشمال", 
+                "الدخان"
+            ],
+            "KW": [
+                "مدينة الكويت", "الأحمدي", "حولي", "الفروانية", "الجهراء", 
+                "مبارك الكبير"
+            ],
+            "BH": [
+                "المنامة", "الرفاع", "المحرق", "مدينة حمد", "مدينة عيسى"
+            ],
+            "OM": [
+                "مسقط", "صلالة", "صحار", "نزوى", "خصب", "بركاء", "الرستاق"
+            ],
+            "IQ": [
+                "بغداد", "البصرة", "الموصل", "أربيل", "النجف", "كربلاء", 
+                "السليمانية", "كركوك", "بابل", "الأنبار"
+            ],
+            "JO": [
+                "عمان", "الزرقاء", "إربد", "العقبة", "المفرق", "جرش", 
+                "الكرك", "مادبا"
+            ],
+            "LB": [
+                "بيروت", "طرابلس", "صيدا", "صور", "زحلة", "النبطية", 
+                "بعلبك", "جبيل"
+            ],
+            "SY": [
+                "دمشق", "حلب", "حمص", "اللاذقية", "درعا", "دير الزور", 
+                "حماة", "الرقة"
+            ],
+            "YE": [
+                "صنعاء", "عدن", "تعز", "الحديدة", "إب", "ذمار", "المكلا"
+            ],
+            "PS": [
+                "القدس", "غزة", "رام الله", "الخليل", "نابلس", "بيت لحم", 
+                "جنين", "طولكرم"
+            ],
+            "DZ": [
+                "الجزائر", "وهران", "قسنطينة", "عنابة", "البليدة", "باتنة", 
+                "سطيف", "تلمسان", "سكيكدة", "بجاية"
+            ],
+            "MA": [
+                "الدار البيضاء", "الرباط", "فاس", "مراكش", "طنجة", "أكادير", 
+                "مكناس", "وجدة", "القنيطرة"
+            ],
+            "TN": [
+                "تونس", "صفاقس", "سوسة", "القيروان", "بنزرت", "قابس", 
+                "أريانة", "المنستير"
+            ],
+            "LY": [
+                "طرابلس", "بنغازي", "مصراتة", "البيضاء", "الزاوية", "سبها", 
+                "سرت", "درنة"
+            ],
+            "SD": [
+                "الخرطوم", "أم درمان", "بورتسودان", "كسلا", "ود مدني", 
+                "الأبيض", "الجنينة", "نيالا"
+            ],
+            "SO": [
+                "مقديشو", "هرجيسا", "بوصاصو", "كيسمايو", "جالكعيو", 
+                "بيدوا", "بربرة"
+            ],
+            "DJ": [
+                "مدينة جيبوتي", "علي صبيح", "تاجورة", "أوبوك", "دخيل"
+            ],
+            "MR": [
+                "نواكشوط", "نواذيبو", "روصو", "زويرات", "كيهيدي", 
+                "أطار", "سيلبابي"
+            ],
+            "TR": [
+                "إسطنبول", "أنقرة", "إزمير", "بورصة", "أضنة", "غازي عنتاب", 
+                "قونية", "أنطاليا", "ديار بكر"
+            ],
+            "ID": [
+                "جاكرتا", "سورابايا", "باندونغ", "ميدان", "باليمبانغ", 
+                "سمارانغ", "ماكاسار", "يوغياكارتا"
+            ],
+            "MY": [
+                "كوالالمبور", "بينانغ", "جوهر بهرو", "إيبوه", "كوتشينغ", 
+                "كوتا كينابالو", "شاه عالم", "كلانغ"
+            ],
+            "PK": [
+                "كراتشي", "لاهور", "إسلام آباد", "بيشاور", "كويتا", 
+                "فيصل آباد", "ملتان", "حيدر آباد"
+            ],
+            "AF": [
+                "كابول", "قندهار", "هرات", "مزار شريف", "جلال آباد", 
+                "كندز", "غزني"
+            ],
+            "IR": [
+                "طهران", "مشهد", "أصفهان", "تبريز", "شيراز", "قم", 
+                "كرمانشاه", "أهواز"
+            ],
+            "BN": [
+                "بندر سري بكاوان", "كوالا بلايت", "سيريا", "توتونغ"
+            ],
+            "BD": [
+                "دكا", "شيتاغونغ", "خولنا", "راجشاهي", "سيلهيت", 
+                "باريسال", "كوميلا"
+            ],
+            "MV": [
+                "ماليه", "أدو", "فوفامولاه", "هيثادهو"
+            ],
+            "AZ": [
+                "باكو", "غانجا", "سومقاييت", "مينغهاجيفير", "شيروان"
+            ],
+            "KZ": [
+                "أستانا", "ألماتي", "شيمكنت", "أكتوبي", "كاراغاندي", 
+                "تاراز"
+            ],
+            "KG": [
+                "بيشكيك", "أوش", "جلال آباد", "كاراكول", "توكموك"
+            ],
+            "TJ": [
+                "دوشانبي", "خجند", "كولوب", "قرغان تيبا", "وحدت"
+            ],
+            "TM": [
+                "عشق آباد", "تركمانباشي", "داشوغوز", "ماري", "بايرمعلي"
+            ],
+            "UZ": [
+                "طشقند", "نمنگان", "سمرقند", "أنديجان", "بخارى", "فرغانة"
+            ],
+            "AL": [
+                "تيرانا", "دوريس", "فلورا", "شكودر", "إلباسان"
+            ],
+            "BA": [
+                "سراييفو", "بانيا لوكا", "موستار", "توزلا", "زنيتشا"
+            ],
+            "XK": [
+                "بريشتينا", "بريزرن", "جيلان", "بييا", "ميتروفيتسا"
+            ],
+            "GM": [
+                "بانجول", "بريكاما", "سيريكوندا", "باسي", "كانيفينغ"
+            ],
+            "GN": [
+                "كوناكري", "نزريكوري", "كانكان", "كينديا", "لابي"
+            ],
+            "ML": [
+                "باماكو", "سيكاسو", "موبيتي", "كايس", "سغو"
+            ],
+            "NE": [
+                "نيامي", "زيندر", "مرادي", "أغاديز", "طاهوا"
+            ],
+            "NG": [
+                "لاغوس", "أبوجا", "كانو", "إبادان", "بورت هاركورت", 
+                "جوس", "مايدوغوري"
+            ],
+            "SN": [
+                "داكار", "توغو", "سانت لويس", "ثيس", "ديوربل"
+            ],
+            "SL": [
+                "فريتاون", "بو", "كينيما", "ماكيني", "كويدو"
+            ],
+            "BF": [
+                "واغادوغو", "بوبو ديولاسو", "كودوغو", "بانفورا", "واهيغويا"
+            ],
+            "TD": [
+                "نجامينا", "مونغو", "أبيشي", "سارة", "دوبا"
+            ],
+            "CI": [
+                "أبيدجان", "ياموسوكرو", "بواكي", "دالوا", "سان بيدرو"
+            ],
+            "CM": [
+                "ياوندي", "دوالا", "غاروا", "باميندا", "ماروا"
+            ],
+            "TG": [
+                "لومي", "سوكودي", "كارا", "أتاكبامي", "داباون"
+            ],
+            "BJ": [
+                "بورتو نوفو", "كوتونو", "باراكو", "أبومي", "ناتيتينغو"
+            ],
+            "GH": [
+                "أكرا", "كوماسي", "تامالي", "تيما", "سكوندي تاكورادي"
+            ]
+        };
+        
+        const methodMapping = {
+            "Egyptian": 5,
+            "UmmAlQura": 4,
+            "Karachi": 1,
+            "MuslimWorldLeague": 3,
+            "NorthAmerica": 2,
+            "Dubai": 6,
+            "Kuwait": 8,
+            "Qatar": 7,
+            "Singapore": 9,
+            "Tehran": 10
+        };
+        
+        function updateCities() {
+            const countrySelect = document.getElementById('country');
+            const citySelect = document.getElementById('city');
+            let selectedCountry = countrySelect.value;
+            
+            if (!citiesByCountry[selectedCountry]) {
+                selectedCountry = 'SA';
+                countrySelect.value = selectedCountry;
+                currentLocation.country = selectedCountry;
+                currentLocation.city = 'المدينة المنورة';
+                localStorage.setItem('selectedCountry', selectedCountry);
+                localStorage.setItem('selectedCity', 'المدينة المنورة');
+            } else {
+                currentLocation.country = selectedCountry;
+                localStorage.setItem('selectedCountry', selectedCountry);
+            }
+            
+            citySelect.innerHTML = '';
+            
+            citiesByCountry[selectedCountry].forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                if (city === currentLocation.city) {
+                    option.selected = true;
+                }
+                citySelect.appendChild(option);
+            });
+            
+            currentLocation.city = citySelect.value;
+            localStorage.setItem('selectedCity', citySelect.value);
+            
+            updatePrayerTimes();
+        }
+        
+        async function fetchPrayerTimes(city, country, method) {
+            const today = new Date().toISOString().split('T')[0];
+            const cacheKey = `${country}-${city}-${method}-${today}`;
+            
+            if (prayerTimesCache[cacheKey]) {
+                return prayerTimesCache[cacheKey];
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}?city=${city}&country=${country}&method=${methodMapping[method]}`);
+                const data = await response.json();
+                
+                if (data.code === 200 && data.data) {
+                    prayerTimesCache[cacheKey] = data.data;
+                    lastUpdateDate = today;
+                    return data.data;
+                }
+            } catch (error) {
+                console.error('Error fetching prayer times:', error);
+            }
+            
+            return getOfflinePrayerTimes(city, country, method);
+        }
+        
+        function getOfflinePrayerTimes(city, country, method) {
+            const offlineTimes = {
+                "EG": {
+                    "القاهرة": {
+                        "Egyptian": {
+                            "Fajr": "4:32 AM",
+                            "Sunrise": "6:08 AM",
+                            "Dhuhr": "12:52 PM",
+                            "Asr": "4:29 PM",
+                            "Maghrib": "7:36 PM",
+                            "Isha": "9:02 PM"
+                        }
+                    }
+                },
+                "SA": {
+                    "المدينة المنورة": {
+                        "UmmAlQura": {
+                            "Fajr": "4:13 AM",
+                            "Sunrise": "5:43 AM",
+                            "Dhuhr": "12:18 PM",
+                            "Asr": "3:45 PM",
+                            "Maghrib": "6:53 PM",
+                            "Isha": "8:13 PM"
+                        }
+                    }
+                }
+            };
+            
+            return {
+                timings: offlineTimes[country]?.[city]?.[method] || offlineTimes["SA"]["المدينة المنورة"]["UmmAlQura"]
+            };
+        }
+        
+        async function updatePrayerTimes() {
+            const countrySelect = document.getElementById('country');
+            const citySelect = document.getElementById('city');
+            const methodSelect = document.getElementById('calculation-method');
+            
+            currentLocation = {
+                country: countrySelect.value,
+                city: citySelect.value,
+                method: methodSelect.value
+            };
+            
+            localStorage.setItem('selectedCountry', currentLocation.country);
+            localStorage.setItem('selectedCity', currentLocation.city);
+            localStorage.setItem('calculationMethod', currentLocation.method);
+            
+            document.getElementById('current-location').textContent = 
+                `${citySelect.options[citySelect.selectedIndex].text}، ${countrySelect.options[countrySelect.selectedIndex].text}`;
+            
+            const prayerData = await fetchPrayerTimes(currentLocation.city, currentLocation.country, currentLocation.method);
+            
+            if (prayerData) {
+                currentPrayerTimes = {
+                    Fajr: prayerData.timings.Fajr,
+                    Sunrise: prayerData.timings.Sunrise,
+                    Dhuhr: prayerData.timings.Dhuhr,
+                    Asr: prayerData.timings.Asr,
+                    Maghrib: prayerData.timings.Maghrib,
+                    Isha: prayerData.timings.Isha
+                };
+                
+                for (const prayer in currentPrayerTimes) {
+                    const time24 = currentPrayerTimes[prayer].split(' ')[0];
+                    const [hours, minutes] = time24.split(':');
+                    let hours12 = parseInt(hours) % 12;
+                    hours12 = hours12 || 12;
+                    const ampm = parseInt(hours) >= 12 ? 'م' : 'ص';
+                    currentPrayerTimes[prayer] = `${hours12}:${minutes} ${ampm}`;
+                }
+                
+                document.getElementById('fajr-time').textContent = currentPrayerTimes.Fajr;
+                document.getElementById('sunrise-time').textContent = currentPrayerTimes.Sunrise;
+                document.getElementById('dhuhr-time').textContent = currentPrayerTimes.Dhuhr;
+                document.getElementById('asr-time').textContent = currentPrayerTimes.Asr;
+                document.getElementById('maghrib-time').textContent = currentPrayerTimes.Maghrib;
+                document.getElementById('isha-time').textContent = currentPrayerTimes.Isha;
+                
+                updateNextPrayer();
+                highlightNextPrayer();
+            }
+        }
+        
+        function updateNextPrayer() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            
+            const prayerMinutes = {};
+            for (const prayer in currentPrayerTimes) {
+                const time12 = currentPrayerTimes[prayer];
+                const [timePart, ampm] = time12.split(' ');
+                const [hours, minutes] = timePart.split(':');
+                
+                let hours24 = parseInt(hours);
+                if (ampm === 'م' && hours24 < 12) hours24 += 12;
+                if (ampm === 'ص' && hours24 === 12) hours24 = 0;
+                
+                prayerMinutes[prayer] = hours24 * 60 + parseInt(minutes);
+            }
+            
+            let nextPrayer = null;
+            let minutesRemaining = 0;
+            
+            for (const prayer of PRAYER_ORDER) {
+                if (prayerMinutes[prayer] > currentTime) {
+                    nextPrayer = prayer;
+                    minutesRemaining = prayerMinutes[prayer] - currentTime;
+                    break;
+                }
+            }
+            
+            if (!nextPrayer) {
+                nextPrayer = 'Fajr';
+                minutesRemaining = (24 * 60 - currentTime) + prayerMinutes['Fajr'];
+            }
+            
+            const hours = Math.floor(minutesRemaining / 60);
+            const minutes = minutesRemaining % 60;
+            
+            let remainingText = '';
+            
+            // Handle hours
+            if (hours > 0) {
+                if (hours === 1) {
+                    remainingText += `${hours} ساعة`;
+                } else if (hours === 2) {
+                    remainingText += `${hours} ساعتان`;
+                } else if (hours >= 3 && hours <= 10) {
+                    remainingText += `${hours} ساعات`;
+                } else {
+                    remainingText += `${hours} ساعة`;
+                }
+            }
+            
+            // Handle minutes
+            if (minutes > 0) {
+                if (hours > 0) {
+                    remainingText += ` و`;
+                }
+                if (minutes === 1) {
+                    remainingText += `${minutes} دقيقة`;
+                } else if (minutes === 2) {
+                    remainingText += `${minutes} دقيقتان`;
+                } else if (minutes >= 3 && minutes <= 10) {
+                    remainingText += `${minutes} دقائق`;
+                } else {
+                    remainingText += `${minutes} دقيقة`;
+                }
+            }
+            
+            if (hours === 0 && minutes === 0) {
+                remainingText = 'الآن';
+            }
+            
+            const prayerNames = {
+                'Fajr': 'الفجر',
+                'Sunrise': 'الشروق',
+                'Dhuhr': 'الظهر',
+                'Asr': 'العصر',
+                'Maghrib': 'المغرب',
+                'Isha': 'العشاء'
+            };
+            
+            document.getElementById('next-prayer').textContent = 
+                `وقت الصلاة التالي: ${prayerNames[nextPrayer]} ${remainingText}`;
+            
+            return nextPrayer;
+        }
+        
+        function highlightNextPrayer() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            
+            const prayerMinutes = {};
+            for (const prayer in currentPrayerTimes) {
+                const time12 = currentPrayerTimes[prayer];
+                const [timePart, ampm] = time12.split(' ');
+                const [hours, minutes] = timePart.split(':');
+                
+                let hours24 = parseInt(hours);
+                if (ampm === 'م' && hours24 < 12) hours24 += 12;
+                if (ampm === 'ص' && hours24 === 12) hours24 = 0;
+                
+                prayerMinutes[prayer] = hours24 * 60 + parseInt(minutes);
+            }
+            
+            document.querySelectorAll('.prayer-time-card').forEach(card => {
+                card.classList.remove('next-prayer-card');
+            });
+            
+            let nextPrayer = null;
+            for (const prayer of PRAYER_ORDER) {
+                if (prayerMinutes[prayer] > currentTime) {
+                    nextPrayer = prayer;
+                    break;
+                }
+            }
+            
+            if (!nextPrayer) {
+                nextPrayer = 'Fajr';
+            }
+            
+            if (nextPrayer) {
+                document.getElementById(`${nextPrayer.toLowerCase()}-card`).classList.add('next-prayer-card');
+            }
+        }
+        
+
+
+
+
+        // دالة لإرسال الإشعارات
+function sendPrayerNotification(prayerName, prayerTime) {
+    const prayerNames = {
+        'Fajr': 'الفجر',
+        'Dhuhr': 'الظهر',
+        'Asr': 'العصر',
+        'Maghrib': 'المغرب',
+        'Isha': 'العشاء'
+    };
+
+    const notificationTitle = `حان الآن وقت صلاة ${prayerNames[prayerName]}`;
+    const notificationOptions = {
+        body: `وقت الصلاة: ${prayerTime}`,
+        icon: 'icons/icon-192x192.png',
+        badge: 'icons/badge-72x72.png',
+        vibrate: [200, 100, 200],
+        tag: 'prayer-time-notification'
+    };
+
+    // التحقق من دعم الإشعارات
+    if (!('Notification' in window)) {
+        console.log('هذا المتصفح لا يدعم الإشعارات');
+    } else if (Notification.permission === 'granted') {
+        new Notification(notificationTitle, notificationOptions);
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                new Notification(notificationTitle, notificationOptions);
+            }
+        });
+    }
+}
+
+// دالة للتحقق من وقت الصلاة وإرسال الإشعار
+function checkPrayerTimeForNotification() {
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    
+    for (const prayer in currentPrayerTimes) {
+        if (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].includes(prayer)) {
+            const time12 = currentPrayerTimes[prayer];
+            const [timePart, ampm] = time12.split(' ');
+            const [hours, minutes] = timePart.split(':');
+            
+            let hours24 = parseInt(hours);
+            if (ampm === 'م' && hours24 < 12) hours24 += 12;
+            if (ampm === 'ص' && hours24 === 12) hours24 = 0;
+            
+            if (currentHours === hours24 && currentMinutes === parseInt(minutes)) {
+                sendPrayerNotification(prayer, currentPrayerTimes[prayer]);
+            }
+        }
+    }
+}
+
+
+
+
+
+        function getHijriDate() {
+            const baseDate = new Date('2025-05-07'); // 9 ذو القعدة 1446 هـ
+            const baseHijri = { year: 1446, month: 11, day: 9 }; // 9 ذو القعدة 1446
+            const now = new Date();
+            
+            // حساب الفرق بالأيام مع ضبط الوقت ليكون منتصف الليل لتجنب مشاكل التوقيت
+            const baseDateAtMidnight = new Date(baseDate);
+            baseDateAtMidnight.setHours(0, 0, 0, 0);
+            const nowAtMidnight = new Date(now);
+            nowAtMidnight.setHours(0, 0, 0, 0);
+            
+            const diffTime = nowAtMidnight - baseDateAtMidnight;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            let hijriDay = baseHijri.day + diffDays;
+            let hijriMonth = baseHijri.month;
+            let hijriYear = baseHijri.year;
+    
+            const daysInMonth = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29];
+    
+            // حساب الأيام والشهور والسنين الهجرية
+            while (hijriDay > daysInMonth[hijriMonth - 1]) {
+                hijriDay -= daysInMonth[hijriMonth - 1];
+                hijriMonth++;
+                if (hijriMonth > 12) {
+                    hijriMonth = 1;
+                    hijriYear++;
+                }
+            }
+    
+            while (hijriDay <= 0) {
+                hijriMonth--;
+                if (hijriMonth <= 0) {
+                    hijriMonth = 12;
+                    hijriYear--;
+                }
+                hijriDay += daysInMonth[hijriMonth - 1];
+            }
+    
+            const monthNames = [
+                'محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الآخرة',
+                'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
+            ];
+    
+            return `${hijriDay} ${monthNames[hijriMonth - 1]} ${hijriYear} هـ`;
+        }
+        
+        function updateHijriDate() {
+            document.getElementById('hijri-date').textContent = getHijriDate();
+        }
+        
+        function updateGregorianDate() {
+            const now = new Date();
+            const day = now.getDate();
+            const year = now.getFullYear();
+            const monthNames = [
+                'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+            ];
+            const month = monthNames[now.getMonth()];
+            document.getElementById('gregorian-date').textContent = `${day} ${month} ${year} م`;
+        }
+        
+        function updateDayName() {
+            const now = new Date();
+            const dayNames = [
+                'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 
+                'الخميس', 'الجمعة', 'السبت'
+            ];
+            document.getElementById('day-name').textContent = dayNames[now.getDay()];
+        }
+        
+      function updateCurrentTime() {
+    const now = new Date();
+    
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? 'م' : 'ص';
+    hours = hours % 12 || 12;
+    
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    
+    document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
+    
+    // التحقق من وقت الصلاة كل دقيقة
+    if (now.getSeconds() === 0) {
+        checkPrayerTimeForNotification();
+        updateNextPrayer();
+        highlightNextPrayer();
+        
+        const today = now.toISOString().split('T')[0];
+        if (today !== lastUpdateDate) {
+            updatePrayerTimes();
+        }
+    }
+    
+    setTimeout(updateCurrentTime, 1000 - now.getMilliseconds());
+}
+        
+        function updateRamadanCountdown() {
+            const ramadanStart = new Date('2026-02-18T00:00:00');
+            const now = new Date();
+            
+            const diff = ramadanStart - now;
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('ramadan-days').textContent = days;
+            document.getElementById('ramadan-hours').textContent = hours;
+            document.getElementById('ramadan-minutes').textContent = minutes;
+            document.getElementById('ramadan-seconds').textContent = seconds;
+            
+            setTimeout(updateRamadanCountdown, 1000);
+        }
+        
+        function updateEidAlFitrCountdown() {
+            const eidFitrStart = new Date('2026-03-20T00:00:00');
+            const now = new Date();
+            
+            const diff = eidFitrStart - now;
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('eid-fitr-days').textContent = days;
+            document.getElementById('eid-fitr-hours').textContent = hours;
+            document.getElementById('eid-fitr-minutes').textContent = minutes;
+            document.getElementById('eid-fitr-seconds').textContent = seconds;
+            
+            setTimeout(updateEidAlFitrCountdown, 1000);
+        }
+        
+        function updateEidAlAdhaCountdown() {
+            const eidAdhaStart = new Date('2025-06-06T00:00:00');
+            const now = new Date();
+            
+            const diff = eidAdhaStart - now;
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('eid-adha-days').textContent = days;
+            document.getElementById('eid-adha-hours').textContent = hours;
+            document.getElementById('eid-adha-minutes').textContent = minutes;
+            document.getElementById('eid-adha-seconds').textContent = seconds;
+            
+            setTimeout(updateEidAlAdhaCountdown, 1000);
+        }
+        
+        async function initApp() {
+            const countrySelect = document.getElementById('country');
+            const citySelect = document.getElementById('city');
+            const methodSelect = document.getElementById('calculation-method');
+            
+            let storedCountry = localStorage.getItem('selectedCountry') || 'SA';
+            let storedCity = localStorage.getItem('selectedCity') || 'المدينة المنورة';
+            let storedMethod = localStorage.getItem('calculationMethod') || 'UmmAlQura';
+            
+            if (!citiesByCountry[storedCountry] || !citiesByCountry[storedCountry].includes(storedCity)) {
+                storedCountry = 'SA';
+                storedCity = 'المدينة المنورة';
+                storedMethod = 'UmmAlQura';
+                localStorage.setItem('selectedCountry', storedCountry);
+                localStorage.setItem('selectedCity', storedCity);
+                localStorage.setItem('calculationMethod', storedMethod);
+            }
+            
+            currentLocation.country = storedCountry;
+            currentLocation.city = storedCity;
+            currentLocation.method = storedMethod;
+            
+            countrySelect.value = currentLocation.country;
+            methodSelect.value = currentLocation.method;
+            updateCities();
+            citySelect.value = currentLocation.city;
+            
+            updateCurrentTime();
+            updateDayName();
+            updateHijriDate();
+            updateGregorianDate();
+            await updatePrayerTimes();
+            updateRamadanCountdown();
+            updateEidAlFitrCountdown();
+            updateEidAlAdhaCountdown();
+            
+            setInterval(updatePrayerTimes, 6 * 60 * 60 * 1000);
+        }
+        
+        window.onload = initApp;
+        
+        window.addEventListener('load', function() {
+            const backgroundImage = new Image();
+            backgroundImage.src = 'https://images.unsplash.com/photo-1519817650390-64a93db51149?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80';
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
